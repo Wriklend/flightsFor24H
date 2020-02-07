@@ -1,12 +1,9 @@
-'use strict'
-
 import { mapFlight } from './mapFlight.js';
 
 const tbody = document.getElementById('tbody');
 
-const render = (flights = []) => { 
-  flights.forEach((item, index) =>
-    tbody.insertAdjacentHTML('beforeend',
+const render = (flights = []) => {
+  flights.forEach((item, index) => tbody.insertAdjacentHTML('beforeend',
       `<tr>
         <th scope='row'>${index}</th>
         <td>Широта: ${item.latitude}\n Долгота: ${item.longitude}</td>
@@ -19,18 +16,18 @@ const render = (flights = []) => {
         <td>${item.distanceToDemodedovo}</td>
       </tr>`
     ));
-}
+};
 
 const getMapFlight = (data) => {
   const flights = [];
 
   for (let key in data) {
     if (Array.isArray(data[key])) {
-      flights.push(mapFlight(data[key]))
+      flights.push(mapFlight(data[key]));
     }
   }
   return flights;
-}
+};
 
 async function loadFlights() {
   try {
@@ -46,7 +43,7 @@ async function loadFlights() {
   }
 }
 
-const getDistance = plane => { 
+const getDistance = plane => {
   const rad = x => {
     return x * Math.PI / 180;
   };
@@ -73,7 +70,7 @@ const getDistance = plane => {
 
 const clearElem = (elem) => {
   elem.innerHTML = '';
-}
+};
 
 const getFlights = () => {
   return loadFlights()
@@ -88,10 +85,10 @@ const getFlights = () => {
                 //Буду рад услышать, как это сделать лучше.
     .then(r => render(r)) // Отрисовка
     .catch(error => new Error(error));
-}
+};
 
 getFlights();
 
 setInterval(() => { //Загружаем данные и обновляем таблицу каждые 5 сек
-  getFlights()
+  getFlights();
 }, 5000);
