@@ -5,7 +5,7 @@ export const mapFlight = (flight) => ({
   course: flight[3],
   altitude: flight[4],
   departureAirport: flight[11],
-  destinationAiroport: flight[12],
+  destinationAirport: flight[12],
   flightNumber: flight[16],
-  distanceToDemodedovo: '',
+  distanceToDomodedovo: '',
 });

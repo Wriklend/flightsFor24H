@@ -1,5 +1,7 @@
 import { mapFlight } from './mapFlight.js';
-import { getDistance } from './getDistance.js';
+import { setDistance } from './setDistance.js';
+
+const FeetInOneMeter = 3.281;
 
 const tbody = document.getElementById('tbody');
 
@@ -10,21 +12,21 @@ const render = (flights = []) => {
         <td>Широта: ${item.latitude}\nДолгота: ${item.longitude}</td>
         <td>${item.speed}</td>
         <td>${item.course}</td>
-        <td>${+(item.altitude / 3.281).toFixed(2)}</td>
+        <td>${(item.altitude / FeetInOneMeter).toFixed(2)}</td>
         <td>${item.departureAirport}</td>
-        <td>${item.destinationAiroport}</td>
+        <td>${item.destinationAirport}</td>
         <td>${item.flightNumber}</td>
-        <td>${item.distanceToDemodedovo}</td>
+        <td>${item.distanceToDomodedovo}</td>
       </tr>`
     ));
 };
 
 const getMapFlight = (data) => {
-  const flights = [];
+  let flights = [];
 
-  for (let key in data) {
-    if (Array.isArray(data[key])) {
-      flights.push(mapFlight(data[key]));
+  for (let [key, value] of Object.entries(data)) {
+    if (Array.isArray(value)) {
+      flights.push(mapFlight(value));
     }
   }
   return flights;
@@ -33,14 +35,14 @@ const getMapFlight = (data) => {
 async function loadFlights() {
   try {
     const r = await fetch('https://data-live.flightradar24.com/zones/fcgi/feed.js?bounds=56.84,55.27,33.48,41.48');
-    if (r.status !== 200) {
+    if (!r.ok) {
       console.log('Status code: ' + r.status);
       return;
     }
     return r.json();
   }
   catch (err) {
-    return console.log('Fetch Error:' + err);
+    console.log('Fetch Error:' + err);
   }
 }
 
@@ -50,21 +52,19 @@ const clearElem = (elem) => {
 
 const getFlights = () => {
   return loadFlights()
-    .then(r => getMapFlight(r)) //Создаем мапу для полученных данных
+    .then(r => getMapFlight(r))
     .catch(error => new Error(error))
-    .then(r => r.map(item => getDistance(item))) //Счиатем дистанцию до Домодедово
+    .then(r => r.map(item => setDistance(item)))
     .catch(error => new Error(error))
-    .then(r => r.sort((a, b) => a.distanceToDemodedovo - b.distanceToDemodedovo))
+    .then(r => r.sort((a, b) => a.distanceToDomodedovo - b.distanceToDomodedovo))
     .catch(error => new Error(error))
     .then(clearElem(tbody)) //Поставил очистку перед отрисовкой,
                 // т.к. при медленном интернете возникает долгая пауза. 
                 //Буду рад услышать, как это сделать лучше.
-    .then(r => render(r)) // Отрисовка
+    .then(r => render(r))
     .catch(error => new Error(error));
 };
 
 getFlights();
 
-setInterval(() => { //Загружаем данные и обновляем таблицу каждые 5 сек
-  getFlights();
-}, 5000);
+setInterval(getFlights, 5000); //Загружаем данные и обновляем таблицу каждые 5 сек
