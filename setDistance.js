@@ -17,6 +17,6 @@ export const setDistance = plane => {
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-  plane.distanceToDomodedovo = +(EarthRadius * c).toFixed(2);
+  plane.distanceToDomodedovo = EarthRadius * c;
   return plane; // Возвращает объект вместе с дистанцией в километрах
 };

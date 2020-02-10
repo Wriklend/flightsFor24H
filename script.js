@@ -16,7 +16,7 @@ const render = (flights = []) => {
         <td>${item.departureAirport}</td>
         <td>${item.destinationAirport}</td>
         <td>${item.flightNumber}</td>
-        <td>${item.distanceToDomodedovo}</td>
+        <td>${item.distanceToDomodedovo.toFixed(2)}</td>
       </tr>`
     ));
 };
