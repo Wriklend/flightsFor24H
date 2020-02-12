@@ -2,6 +2,7 @@ import { mapFlight } from './mapFlight.js';
 import { setDistance } from './setDistance.js';
 
 const FeetInOneMeter = 3.281;
+const KilometersInOneKnot = 1.85;
 
 const tbody = document.getElementById('tbody');
 
@@ -10,7 +11,7 @@ const render = (flights = []) => {
       `<tr>
         <th scope='row'>${index}</th>
         <td>Широта: ${item.latitude}\nДолгота: ${item.longitude}</td>
-        <td>${item.speed}</td>
+        <td>${(item.speed * KilometersInOneKnot).toFixed(2)}</td>
         <td>${item.course}</td>
         <td>${(item.altitude / FeetInOneMeter).toFixed(2)}</td>
         <td>${item.departureAirport}</td>
@@ -50,21 +51,22 @@ const clearElem = (elem) => {
   elem.innerHTML = '';
 };
 
-const getFlights = () => {
-  return loadFlights()
-    .then(r => getMapFlight(r))
-    .catch(error => new Error(error))
-    .then(r => r.map(item => setDistance(item)))
-    .catch(error => new Error(error))
-    .then(r => r.sort((a, b) => a.distanceToDomodedovo - b.distanceToDomodedovo))
-    .catch(error => new Error(error))
-    .then(clearElem(tbody)) //Поставил очистку перед отрисовкой,
-                // т.к. при медленном интернете возникает долгая пауза. 
-                //Буду рад услышать, как это сделать лучше.
-    .then(r => render(r))
-    .catch(error => new Error(error));
-};
+async function getFlights() {
+  try {
+    const flights = await loadFlights();
+    const flightsWithDistance = getMapFlight(flights).map(item => setDistance(item));
+    const sortedFlights = flightsWithDistance.sort((a, b) => a.distanceToDomodedovo - b.distanceToDomodedovo);
+    clearElem(tbody);
+    render(sortedFlights);
+    return;
+  }
+  catch (err) {
+    console.log(err);
+  }
+}
 
 getFlights();
 
-setInterval(getFlights, 5000); //Загружаем данные и обновляем таблицу каждые 5 сек
+let timerId = setTimeout(function timer() {
+  getFlights().finally(timerId = setTimeout(timer, 5000));
+}, 5000);
